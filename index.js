@@ -6,6 +6,7 @@ const PORT = 8000;
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const { checkForAuthenticationCookie } = require("./middlewares/authentication");
+const Blog = require("./models/blog");
 
 const userRoute = require("./routes/user");
 const blogRoute = require("./routes/blog");
@@ -19,14 +20,16 @@ app.set("views", path.resolve("./views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(checkForAuthenticationCookie("token"));
-
+app.use(express.static(path.resolve("./public")));
 // Connection to MongoDB 
 mongoose.connect("mongodb://localhost:27017/blogify")
   .then(() => { console.log("MongoDB connected") });
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+  const allBlogs = await Blog.find({});
   return res.render("home", {
     user: req.user,
+    blogs : allBlogs,
   });
 });
 
